@@ -1,0 +1,124 @@
+﻿Using System
+Using System.Data
+Using System.Configuration
+Using System.Collections
+Using System.Web
+Using System.Web.Security
+Using System.Web.UI
+Using System.Web.UI.WebControls
+Using System.Web.UI.WebControls.WebParts
+Using System.Web.UI.HtmlControls
+Using System.Web.Security
+Using System.IO 
+
+BegClass views_login Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
+
+	DclDB DGDB DBName('*Public/Cypress') 
+
+	BegFunc CheckWebUserCredentials Type(*Boolean)
+		DclSrParm User     Type(*String) 
+		DclSrParm Password Type(*String) 
+
+		// Check data store for user with given password. 
+		// Don't store passwords in plain text! Store only hashed, salted passwords
+		// in your data store. 
+
+		LeaveSr *True 
+	EndFunc 
+
+
+	BegFunc CheckIBMiCredentials Type(ASNA.DataGate.Common.dgException) 
+		DclSrParm User     Type(*String) 
+		DclSrParm Password Type(*String) 
+
+		// Cache these values in the session object. When other pages need 
+		// to reconnect, these values are then available without prompting 
+		// for the duration of this session. 			
+		Session['user'] = User
+		Session['password'] = Password
+
+		DGDB.DBName = Session['dbname'].ToString()
+		DGDB.User = User
+		DGDB.Password = Password
+
+		Try 
+			Connect DGDB 
+		Catch ex Type(ASNA.DataGate.Common.dgException)
+			LeaveSR ex 
+		Finally
+			Disconnect DGDB 
+		EndTry 
+
+		LeaveSr *Nothing 
+	EndFunc 
+
+    BegSr Page_Load Access(*Private) Event(*This.Load)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+		DclFld CurrentMaster Type(HomeMaster) 
+
+		Page.Title = 'Login'
+
+		CurrentMaster = *This.Master *As HomeMaster
+		CurrentMaster.ChildPage = *New FileInfo(*This.Request.Url.LocalPath).Name.ToLower()
+    	CurrentMaster.PageHeading = 'Heartland Co-op'
+
+    EndSr
+
+    BegSr Page_Unload Access(*Private) Event(*This.Unload)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+        //
+        // Called when the page is unloaded.
+        //
+    EndSr
+
+
+	BegSr buttonlogin_Click Access(*Private) Event(*This.buttonlogin.Click)
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(System.EventArgs)
+
+		/*
+
+		// If validating Web user:
+		// Check for existence of user and password in a data store.
+		// If that function returns true, the user/password validated and that user is 
+		// logged in. This user is independent of the IBM i and its users. A general 
+		// user profile and password connects the app to the IBM i. (This means WRKACTJOB
+		// shows many of the same user). 
+		
+		If (CheckCredentials(user.text, password.text)
+			FormsAuthentication.RedirectFromLoginPage(user.Text, rememberme.Checked) 
+		EndIf
+
+		*/
+
+		// If validating IBM i user.
+		// Attempt DB connect with user credentials.
+		DclFld ex Type(ASNA.DataGate.Common.dgException) 
+
+		ex = CheckIBMiCredentials(user.Text, password.Text)
+		ex = *Nothing 
+		If ex = *Nothing 
+			FormsAuthentication.RedirectFromLoginPage(user.Text, rememberme.Checked) 
+		Else 
+			// Show a detailed error message only if debug mode is on. 
+			If (context.Current.IsDebuggingEnabled)     
+				loginFailedValidator.ErrorMessage = ex.Message 
+			EndIf
+		EndIf
+	EndSr
+
+	BegSr loginFailedValidator_ServerValidate Access(*Private) Event(*This.loginFailedValidator.ServerValidate)
+		DclSrParm source Type(*Object)
+		DclSrParm args Type(System.Web.UI.WebControls.ServerValidateEventArgs)
+
+		// In most forms, you'd test some logic here to see if the custom validator 
+		// failed. In this case, if control gets here the page wasn't redirect with the 
+		// FormsAuthentication class which means there is an error. 
+		args.IsValid = *False 				
+	EndSr
+
+EndClass

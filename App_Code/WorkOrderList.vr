@@ -1,0 +1,129 @@
+﻿Using System
+Using System.Collections.Generic
+Using System.Linq
+Using System.Text 
+Using System.Data
+Using System.Configuration
+Using System.Web
+Using System.Web.Security
+Using System.Web.UI
+Using System.Web.UI.WebControls
+Using System.Web.UI.WebControls.WebParts
+Using System.Web.UI.HtmlControls
+
+/// <summary>
+/// Summary description for WorkOrderList
+/// </summary>
+BegClass WorkOrderList Access(*Public)
+
+    DclDB pgmDB DBName("*PUBLIC/DG NET Local")
+
+    DclDiskFile  Customer +
+          Type(*Input) +
+          Org(*Indexed) +
+          Prefix(Customer_) +
+          File("Examples/CMastNewL2") +
+          DB(pgmDB) +
+          ImpOpen(*No)
+          
+    DclMemoryFile InfoList ImpOpen(*Yes) 
+        DclRecordFormat InfoListR
+		DclRecordFld    InfoList_Status Type(*Char) Len(1) 
+		DclRecordfld    InfoList_AccountID Type(*Char) Len(9)
+        DclRecordFld    InfoList_IconClass Type(*Char) Len(128)
+        DclRecordFld    InfoList_LineInfo  Type(*Char) Len(512)
+        
+    DclFld CustomerName      Type(*String) Access(*Public)         
+    DclFld CustomerNumber    Type(*String) Access(*Public) 
+    DclFld PositionToMessage Type(*String) Access(*Public) 
+        
+    DclFld PageSize Type(*Integer4)  
+    
+    BegConstructor Access(*Public)
+        //
+        // Class constructor. Receives an ASNA Database object and
+        // the number of records to read.
+        //
+        DclSrParm pgmDB     Type(ASNA.VisualRPG.Runtime.Database)
+        DclSrParm PageSize  Type(*Integer4)
+
+        *This.pgmDB = pgmDB
+        *This.PageSize = PageSize 
+    EndConstructor               
+          
+    BegSr OpenData 
+        If (NOT pgmDB.IsOpen)
+            Connect pgmDB
+        EndIf
+        Open Customer
+    EndSr
+
+    BegSr CloseData
+        Close *All
+    EndSr 
+
+    BegFunc GetDataRows Type(DataTable) Access(*Public) 
+		OpenData()
+
+        If (String.IsNullOrEmpty(CustomerNumber)) AND + 
+           (string.IsNullOrEmpty(CustomerName))           
+            SetLL Customer Key(*Start) 
+        Else 
+            Customer_CMCustNo = CustomerNumber
+            Customer_CMName = CustomerName.Trim()  
+            SetLL Customer Key(Customer_CMName, Customer_CMCustNo)        
+            If (NOT Customer.IsFound) 
+                PositionToMessage = "Nothing found starting with' " + CustomerName.Trim() + "'" 
+                SetLL Customer Key(*Start)             
+            EndIf
+        EndIf   
+        
+        LeaveSr GetRows()
+    EndFunc 
+    
+    BegFunc GetRows Type(DataTable)
+        DclFld Row Type(*Integer4) 
+
+		DclFld InfoTemplate Type(StringBuilder) New(1024)
+		DclFld RowTemplate  Type(StringBuilder) New(1024)
+
+		InfoTemplate.Append('{{order-number}}<br>')
+		InfoTemplate.Append('{{customer-number}}-{{customer-name}}<br>')
+		InfoTemplate.Append('{{directions}}<br>')
+		InfoTemplate.Append('{{product}}')
+        
+        Do FromVal(1) ToVal(PageSize) Index(Row) 
+            Read Customer 
+            If (Customer.IsEof) 
+                Leave
+            EndIf
+			
+			infoList_IconClass = (Customer_CMActive = '0') ? +
+			   "fas fa-thumbs-down big-icon-red" : +
+			   "fas fa-thumbs-up big-icon-green"
+
+			InfoList_AccountId = Customer_CMCustNo.ToString('#########')
+			InfoList_Status = Customer_CMActive 
+
+			RowTemplate.Clear()
+			RowTemplate.Append(InfoTemplate.ToString())
+		    RowTemplate.Replace('{{order-number}}', '546-992378')
+		    RowTemplate.Replace('{{customer-number}}', Customer_CMCustNo.ToString("00000000"))
+		    RowTemplate.Replace('{{customer-name}}', Customer_CMName.Trim())
+		    RowTemplate.Replace('{{directions}}', '1450 West Field')
+		    RowTemplate.Replace('{{product}}', 'Dry Run')
+
+			InfoList_LineInfo = RowTemplate.ToString() 
+			
+            Write InfoList 
+        EndDo
+
+        CustomerNumber = Customer_CMCustNo
+        CustomerName = Customer_CMName 
+
+		CloseData()
+        
+        LeaveSr InfoList.DataSet.Tables[ 0 ]
+    EndFunc 
+
+EndClass

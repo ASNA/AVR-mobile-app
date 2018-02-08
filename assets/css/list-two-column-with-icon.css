@@ -1,0 +1,104 @@
+﻿@media (max-width: 2000px) {
+
+    .mobile-only {
+        display: none;
+    }
+
+}
+
+@media (max-width: 700px) {
+    html {
+        font-size: 85%;
+    }
+
+    .mobile-only {
+        display: block;
+    }
+}   
+
+
+/*
+ | Navbar 
+ */
+
+section.navigation {
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   justify-content: flex-start;
+   align-items: center; 
+   padding: 12px 4px 12px 4px;
+}
+
+section.navigation > div {
+   width: 4rem;
+   padding: 4px 4px 4px 4px;
+   background: #17202A;
+   margin-left: 6px;
+   text-align: center;
+}   
+
+/*
+ |
+ */
+section.navigation > div:last-child {
+   margin-left: auto;
+}
+
+
+/*
+ | List CSS
+ */
+
+section, aside {
+   /*outline: 1px dashed red;*/
+}
+
+section.info-item-container {
+   display: grid;
+   grid-template-rows: 1;
+   grid-template-columns: 5rem 1fr auto;
+}
+
+section.info-item-container:first-child {
+    border-top: 1px gray solid;        
+}
+
+section.info-item-container {
+    border-bottom: 1px gray solid;        
+}
+
+section.info-item-container aside.icon {
+   padding: 4px;
+   grid-column: 1 / span 1;
+   display: flex;
+   justify-content: center;
+   align-items: center;   
+}
+
+section.info-item-container section.item {
+   padding: 4px 3px 4px 8px;
+   grid-column: 2 / span 1;
+}
+
+section.info-item-container section.item a {
+   text-decoration: none;
+   color: black;
+}
+
+section.info-item-container section.nav {
+   padding: 4px 8px 4px 8px;
+   grid-column: 3 / span 1;
+   display: flex;
+   justify-content: center;
+   align-items: center;      
+}
+
+.big-icon-red {
+    font-size: 350%;
+    color: red;
+}
+
+.big-icon-green {
+    font-size: 350%;
+    color: green;

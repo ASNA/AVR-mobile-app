@@ -1,0 +1,56 @@
+﻿Using System
+Using System.Collections.Generic
+Using ASNA.JsonRestRouting
+
+/// <summary>
+/// Summary description for WorkOrdersController
+/// </summary>
+BegClass WorkOrdersController Access(*Public) Extends(ASNA.JsonRestRouting.Controller)
+
+	DclDB DGDB DBName('*Public/DG Net Local') 
+
+	BegFunc ChangeStatusAction Access(*Public) Type(GenericJsonResponse) 
+		// Use the GenericJsonResponse object for working with 
+		// generic Json. 
+		DclFld Response Type(GenericJsonResponse) New() 	
+		DclFld JsonRequest Type(NewtonSoft.Json.Linq.JObject)
+		
+		// Declare variables to hold values passed in from Json.
+		DclFld ActiveDBNameKey Type(*String) 
+	    DclFld CMCustNo Type(*Integer4) 
+        DclFld Status Type(*String) 		
+		DclFld NewStatus Type(*String)
+
+		DclFld Json Type(*String) 
+		DclFld repo Type(OrderRepository)
+
+	    ActiveDBNameKey = System.Configuration.ConfigurationManager.AppSettings["ActiveDBName"]
+		DGDB.DBName = System.Configuration.ConfigurationManager.AppSettings[ActiveDBNameKey]
+		Connect DGDB 
+
+		// Get incoming Json object.
+		JsonRequest = *Base.GetJsonRequestContent()		
+
+		// Fetch values from Json object--these are case-senstive and must be 
+		// cast appropriately.
+		CMCustNo = JsonRequest['cmcustno'].ToString()
+		Status = JsonRequest['status'].ToString() 
+		
+		// Update record.
+		NewStatus = (Status = '0') ? '1' : '0'
+		repo = *New OrderRepository(DGDB)
+		repo.ToggleStatus(CMCustNo, NewStatus) 
+
+		Disconnect DGDB 
+
+		// Assign Json return values.		
+		Response.Add('cmcustno', CMCustNo.ToString()) 
+		Response.Add('status', Status.ToString()) 
+		Response.Add('newstatus', NewStatus.ToString()) 
+		Response.Add('httpstatus', 'ok') 
+
+        LeaveSr Response 
+	EndFunc 
+	
+EndClass
+

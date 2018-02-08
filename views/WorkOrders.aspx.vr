@@ -1,0 +1,61 @@
+﻿Using System
+Using System.Data
+Using System.Configuration
+Using System.Collections
+Using System.Web
+Using System.Web.Security
+Using System.Web.UI
+Using System.IO 
+Using System.Web.UI.WebControls
+Using System.Web.UI.WebControls.WebParts
+Using System.Web.UI.HtmlControls
+
+BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
+
+	DclDb DGDB DBName('*Public/DG NET Local') 
+
+	DclFld workList Type(WorkOrderList) 
+
+    BegSr Page_Load Access(*Private) Event(*This.Load)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+		DGDB.DBName = Session['dbname'].ToString()
+		Connect DGDB
+
+		worklist = *New WorkOrderList(DGDB, 5) 
+
+        If (NOT Page.IsPostBack)
+			Page.Title = 'Work orders'
+
+			DclFld CurrentMaster Type(HomeMaster) 
+
+			CurrentMaster = *This.Master *As HomeMaster
+			CurrentMaster.ChildPage = *New FileInfo(*This.Request.Url.LocalPath).Name
+			CurrentMaster.PageHeading = 'Work order ready?'
+
+			listviewWorkOrders.DataSource = workList.GetDataRows()
+			listviewWorkOrders.DataBind()
+        Else
+            //
+            // Called subsequent times that the page is displayed.
+            //
+        EndIf
+    EndSr
+
+    BegSr Page_Unload Access(*Private) Event(*This.Unload)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+		Close *All
+		Disconnect DGDB
+    EndSr
+
+	BegSr linkbuttonLogout_Click Access(*Private) Event(*This.linkbuttonLogout.Click)
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(System.EventArgs)
+
+		FormsAuthentication.SignOut()
+		FormsAuthentication.RedirectToLoginPage()		
+	EndSr
+EndClass

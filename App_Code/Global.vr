@@ -1,0 +1,150 @@
+﻿Using System
+Using System.Web.Routing
+Using ASNA.JsonRestRouting
+Using System.Web
+Using System.Web.Security
+
+/// <summary>
+/// Summary description for Global
+/// </summary>
+BegClass Global Access(*Public) Extends(System.Web.HttpApplication)
+
+	BegSr Application_Start
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(EventArgs)
+
+		// Code that runs on application startup
+
+        RegisterRoutes(RouteTable.Routes)
+	EndSr
+
+	BegSr Application_End
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(EventArgs)
+
+		//  Code that runs on application shutdown
+
+	EndSr
+        
+
+	BegSr Application_BeginRequest
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(EventArgs)
+
+		DclFld context Type(HttpApplication)
+		context = sender *As HttpApplication
+//
+		DclFLd t Type(*Boolean) 
+//
+//		t = FormsAuthentication.IsEnabled
+		t = IsAjaxRequest(context)
+//
+//		If (FormsAuthentication.IsEnabled AND +
+//            IsAjaxRequest(context))
+//			
+//			context.Response.SuppressFormsAuthenticationRedirect = *True
+//		EndIf
+
+	EndSr
+
+	BegFunc IsAjaxRequest Type(*Boolean) 
+		DclSrParm context Type(HttpApplication)
+
+		DclFld t Type(*String) 
+
+		If context.Request.FilePath.StartsWith('/api/') AND +
+		   context.Request.ContentType = 'application/json'
+			t = 't'
+		Else
+			t ='t'
+		EndIf
+
+
+//		ForEach key Type(*String) Collection(context.Request.Headers.Keys) 
+//			t = context.Request[key]
+//		EndFor 
+
+		If (context.Request.Headers['x-requested-with'] <> *Nothing) 		
+			t = context.Request.Headers["x-requested-with"].ToString()
+		EndIf 
+
+		LeaveSr *True
+	EndFunc 
+
+	BegSr Application_EndRequest
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(EventArgs)
+
+		DclFld context Type(HttpApplication)
+		context = sender *As HttpApplication
+	
+		If (FormsAuthentication.IsEnabled AND +
+		    context.Response.StatusCode = 302 AND +  
+            IsAjaxRequest(context))
+		
+			context.Response.SuppressFormsAuthenticationRedirect = *True
+		EndIf
+
+	EndSr
+
+
+	BegSr Application_Error
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(EventArgs)
+
+		// Code that runs when an unhandled error occurs
+
+	EndSr
+
+	BegSr Session_Start
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(EventArgs)
+
+        DclFld ActiveDBNameKey  Type(*String)
+        DclFld DBName        Type(*String) 
+
+        ActiveDBNameKey = System.Configuration.ConfigurationManager.AppSettings["ActiveDBName"]
+        DBName = System.Configuration.ConfigurationManager.AppSettings[ActiveDBNameKey]
+        //HTTPContext.Current.Session['dbname'] = DBName
+        Session['dbname'] = DBName
+	EndSr
+
+	BegSr Session_End
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(EventArgs)
+
+		// Code that runs when a session ends. 
+		// Note: The Session_End event is raised only when the sessionstate mode
+		// is set to InProc in the Web.config file. If session mode is set to StateServer 
+		// or SQLServer, the event is not raised.
+
+	EndSr
+
+
+    BegSr RegisterRoutes
+        DclSrParm routes Type(RouteCollection)
+
+        DclFld restRouter Type(ASNA.JsonRestRouting.Router) 
+        restRouter = *New ASNA.JsonRestRouting.Router(routes) 
+
+        // ASPX page routes. 		
+        // This support is provided directly by MS .NET.
+//      routes.MapPageRoute("", "", "~/views/index.aspx")
+//      routes.MapPageRoute("", "home", "~/views/index.aspx")
+//      routes.MapPageRoute("", "workorders", "~/views/CustomerList.aspx")
+//
+//		restRouter.Page("", "/index", "~/views/index.aspx")  
+//		restRouter.Page("", "/workorders", "~/views/customerlist.aspx")  
+
+        // RESTful routes.
+        // This suport is provided by the ASNA.JsonRestRouting assembly.
+        restRouter.Post("api/changestatus", "ChangeStatusAction", *TypeOf(WorkOrdersController))
+//        restRouter.Get("api/contact/{id}", "ShowAction", *TypeOf(ContactController))
+//        restRouter.Post("api/contacts", "CreateAction", *TypeOf(ContactController))
+//        restRouter.Put("api/contacts/{id}", "UpdateAction", *TypeOf(ContactController))
+//        restRouter.Delete("api/contacts/{id}", "DeleteAction", *TypeOf(ContactController))
+    EndSr
+
+
+
+EndClass
