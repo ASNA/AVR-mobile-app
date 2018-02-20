@@ -14,3 +14,9 @@
 .container {
     margin-top: 2em !important;
 }
+
+.debug-header {
+    width: 100%;
+    background-color: #f8d7da;
+    padding: .5em;
+}

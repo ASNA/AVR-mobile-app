@@ -30,13 +30,21 @@
     <%
     If (HttpContext.Current.IsDebuggingEnabled)     
     %>
-    <div>
-        <small style="padding: 6px" class="alert-danger">Debugging is enabled</small>
+     <div class="container-fluid alert-danger">
+        <small>Debugging is enabled</small>
     </div>
     <%
     EndIf 
     %>
 
+<!--
+    
+    2107643809
+    xferli
+
+        <small style="padding: 6px;"
+               class="alert-danger">Debugging is enabled</small>
+-->
     
     <form id="form1" runat="server">        
 
@@ -79,10 +87,10 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-        <asp:contentplaceholder id="pageScripts" runat="server">
-        </asp:contentplaceholder>
 
     </form>
 
+        <asp:contentplaceholder id="pageScripts" runat="server">
+        </asp:contentplaceholder>
     </body>
 </html>

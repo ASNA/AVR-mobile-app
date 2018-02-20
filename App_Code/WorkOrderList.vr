@@ -62,7 +62,7 @@ BegClass WorkOrderList Access(*Public)
         Close *All
     EndSr 
 
-    BegFunc GetDataRows Type(DataTable) Access(*Public) 
+    BegFunc GetDataRows Type(DataTable) //Access(*Public) 
 		OpenData()
 
         If (String.IsNullOrEmpty(CustomerNumber)) AND + 
