@@ -41,6 +41,8 @@ BegClass views_login Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 		DGDB.User = User
 		DGDB.Password = Password
 
+		LeaveSr *Nothing
+
 		Try 
 			Connect DGDB 
 		Catch ex Type(ASNA.DataGate.Common.dgException)

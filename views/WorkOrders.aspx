@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="AVR" MasterPageFile="~/HomeMaster.master" AutoEventWireup="false" CodeFile="WorkOrders.aspx.vr" Inherits="WorkOrders" Title="Untitled Page" %>
+<%@ Import Namespace="System.Data" %> 
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
     <link rel="stylesheet" href="<%=Page.ResolveUrl("~")%>assets/css/list-two-column-with-icon.css">
@@ -45,16 +46,20 @@
             <ItemTemplate>
                <section class="info-item-container">
 
-                  <aside class="icon" data-status="<%# Eval("InfoList_Status") %>" 
-                                      data-accountid="<%# Eval("InfoList_AccountId") %>"> 
+                   <%--Avoid Eval!--%>
+                   <%-- Nope! <%# Eval("InfoList_Status") %> --%>
+                   <%--https://www.codeproject.com/Articles/623516/The-Evil-of-Eval-in-ASP-NET--%>
+
+                  <aside class="icon" data-status="<%# (Container.DataItem *As DataRowView)["InfoList_Status"] %>" 
+                                      data-accountid="<%# (Container.DataItem *As DataRowView)["InfoList_AccountId"] %>"> 
                      <a href="#">
-                         <i class="<%# Eval("InfoList_IconClass") %> change-status"></i>
+                         <i class="<%# (Container.DataItem *As DataRowView)["InfoList_IconClass"] %> change-status"></i>
                      </a>
                   </aside>
                   <section class="item">
                       <a href="showmap.aspx">
                         <div>
-                            <%# Eval("InfoList_LineInfo") %>
+                            <%# (Container.DataItem *As DataRowView)["InfoList_LineInfo"] %>
                         </div>     
                       </a>  
                   </section>  
