@@ -11,22 +11,18 @@
     <section>
         <section class="navigation">
             <div class="mobile-only">
-                <i style="font-size: 250%; color: white"
-                    class="fas fa-home"></i>
+                <i class="fas fa-home nav-button"></i>
             </div>
             <div>
-                <i style="font-size: 250%; color: white"
-                    class="fas fa-angle-left"></i>
+                <asp:LinkButton ID="ShowPrevPageButton" cssclass="nav-buttonxx" runat="server"><i class="fas fa-angle-left nav-button"></i></asp:LinkButton>
             </div>
             <div>
-                <i style="font-size: 250%; color: white"
-                    class="fas fa-angle-right"></i>
+                <asp:LinkButton ID="ShowNextPageButton" cssclass="nav-buttonxx" runat="server"><i class="fas fa-angle-right nav-button"></i></asp:LinkButton>
             </div>
             <div class="mobile-only">
                 <asp:LinkButton ID="linkbuttonLogout" runat="server">
                     <div>
-                    <i style="font-size: 250%; color: white"
-                       class="fas fa-sign-out-alt"></i>
+                        <i class="fas fa-sign-out-alt nav-button"></i>
                     </div>
                 </asp:LinkButton>
             </div>

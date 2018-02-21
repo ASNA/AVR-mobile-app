@@ -1,0 +1,169 @@
+﻿Using System
+Using System.Collections.Generic
+Using System.Linq
+Using System.Data
+Using System.Text 
+Using System.Configuration
+Using System.Web
+Using System.Web.Security
+Using System.Web.UI
+Using System.Web.UI.WebControls
+Using System.Web.UI.WebControls.WebParts
+Using System.Web.UI.HtmlControls
+
+/// <summary>
+/// Summary description for DoctorOrderList
+/// </summary>
+BegClass DoctorOrderList Access(*Public)
+
+    DclDB DGDB DBName("*PUBLIC/Cypress")
+
+	DclDiskFile WebTempFile +
+		Type(*Input) +
+		Org(*Indexed) +
+		Prefix(WebTemp_) +
+		File("RPMRDATA/WebTemp") +
+		DB(DGDB) +
+		ImpOpen(*No) 
+
+    DclMemoryFile InfoList ImpOpen(*Yes) 
+        DclRecordFormat InfoListR
+		DclRecordFld    InfoList_Status Type(*Char) Len(1) 
+		DclRecordfld    InfoList_AccountID Type(*Char) Len(9)
+        DclRecordFld    InfoList_IconClass Type(*Char) Len(128)
+        DclRecordFld    InfoList_LineInfo  Type(*Char) Len(512)
+
+	DclFld PageSize Type(*Integer4) 
+	DclFld MoreRows Type(*Integer4) 
+	DclFld RowsReturned Type(*Integer4) 
+
+    DclFld CustomerName      Type(*String) Access(*Public)         
+    DclFld CustomerNumber    Type(*String) Access(*Public) 
+
+
+	BegConstructor Access(*Public)
+        //
+        // Class constructor. Receives an ASNA Database object and
+        // the number of records to read.
+        //
+        DclSrParm DGDB     Type(ASNA.VisualRPG.Runtime.Database)
+        DclSrParm PageSize Type(*Integer4)
+
+        *This.DGDB = DGDB
+        *This.PageSize = PageSize 
+	EndConstructor
+
+    BegSr OpenData 
+        If (NOT DGDB.IsOpen)
+			DGDB.InitialLibl = *New String[] {'rpmrdata', 'rpdream'}				
+            Connect DGDB
+        EndIf
+        Open WebTempFile
+    EndSr
+
+    BegSr CloseData
+        Close *All
+    EndSr 
+
+    BegFunc PopulateList Type(DataTable) Access(*Public) 
+		DclSrParm PageNo Type(*Integer4) 
+
+		DclFld Result Type(CallInfo) 
+
+		OpenData()
+
+		Result = CallPgm2(*This.DGDB, PageNo, *This.PageSize) 
+		*This.MoreRows = Result.MoreRows
+		*This.RowsReturned = Result.RowsReturned
+
+		If (Result.RowsReturned = 0)
+			LeaveSr *Nothing 
+		EndIf
+       
+	    // If zero then no rows read. 
+		LeaveSr GetRows()
+    EndFunc 
+    
+    BegFunc GetRows Type(DataTable)
+        DclFld Row Type(*Integer4) 
+
+		DclFld InfoTemplate Type(StringBuilder) New(1024)
+		DclFld RowTemplate  Type(StringBuilder) New(1024)
+
+		InfoTemplate.Append('{{order-number}}<br>')
+		InfoTemplate.Append('{{customer-number}}-{{customer-name}}<br>')
+		InfoTemplate.Append('{{directions}}<br>')
+		InfoTemplate.Append('{{product}}')
+        
+        Do FromVal(1) ToVal(PageSize) Index(Row) 
+            Read WebTempFile 
+            If (WebTempFile.IsEof) 
+                Leave
+            EndIf
+			
+			infoList_IconClass = (WebTemp_CMActive = '0') ? +
+			   "fas fa-thumbs-down big-icon-red" : +
+			   "fas fa-thumbs-up big-icon-green"
+
+			InfoList_AccountId = WebTemp_CMCustNo.ToString('###########')
+			InfoList_Status = WebTemp_CMActive
+
+			RowTemplate.Clear()
+			RowTemplate.Append(InfoTemplate.ToString())
+		    RowTemplate.Replace('{{order-number}}', '456675')
+		    RowTemplate.Replace('{{customer-number}}', WebTemp_CMCustNo.ToString('############'))
+		    RowTemplate.Replace('{{customer-name}}', WebTemp_CMName.Trim())
+		    RowTemplate.Replace('{{directions}}', WebTemp_CMCity)
+		    RowTemplate.Replace('{{product}}', 'Dry Run')
+
+			InfoList_LineInfo = RowTemplate.ToString() 
+			
+            Write InfoList 
+        EndDo
+
+        CustomerNumber = WebTemp_CMCustNo
+        CustomerName = WebTemp_CMName 
+
+		CloseData()
+        
+        LeaveSr InfoList.DataSet.Tables[ 0 ]
+    EndFunc 
+
+
+	BegFunc CallPgm2  Type(CallInfo) Access(*Public) 
+		DclSrParm DGDB Type(ASNA.VisualRPG.Runtime.Database) 
+		DclSrParm PageNo Type(*Integer4) 
+		DclSrParm PageSize Type(*Integer4) 
+
+		DclFld PageNumber Type(*Integer4) 
+		DclFld MoreRows Type(*Integer4) 
+		DclFld RowsReturned Type(*Integer4) 
+		DclFld Filter Type(*Char) Len(40) 
+		DclFld UserName Type(*Char) Len(10)
+
+		DclFld Result Type(CallInfo) New() 			
+
+		MoreRows = 0
+		RowsReturned = 0
+		Filter = *BLANKS
+		UserName = 'abcdef'
+	
+		Call 'RPDREAM/sqldoc' DB(DGDB) 
+		DclParm PageSize
+		DclParm PageNo
+		DclParm MoreRows
+		DclParm RowsReturned
+		DclParm Filter
+		DclParm UserName 
+
+ 		Result.MoreRows = MoreRows 
+		Result.RowsReturned = RowsReturned
+		LeaveSr Result
+	EndFunc
+
+EndClass
+
+BegClass CallInfo Access(*Public) 
+	DclProp MoreRows Type(*Integer4) Access(*Public) 
+	DclProp RowsReturned Type(*Integer4) Access(*Public) 
+EndClass 

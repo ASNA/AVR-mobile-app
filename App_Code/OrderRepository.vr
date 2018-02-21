@@ -16,16 +16,15 @@ Using System.Web.UI.HtmlControls
 /// </summary>
 BegClass OrderRepository Access(*Public)
 
-    DclDB pgmDB DBName("*PUBLIC/DG NET Local")
+    DclDB pgmDB DBName("*PUBLIC/Cypress")
 
-    DclDiskFile  Customer +
+    DclDiskFile  DoctorWKL1 +
           Type(*Update) +
           Org(*Indexed) +
-          Prefix(Customer_) +
-          File("Examples/CMastNewL1") +
+          Prefix(Doctor_) +
+          File("RPMRData/DoctorWKL1") +
           DB(pgmDB) +
-          ImpOpen(*No) +
-		  AddRec(*Yes) 
+          ImpOpen(*No) 
    
     BegConstructor Access(*Public)
         //
@@ -41,7 +40,7 @@ BegClass OrderRepository Access(*Public)
         If (NOT pgmDB.IsOpen)
             Connect pgmDB
         EndIf
-        Open Customer
+        Open DoctorWKL1
     EndSr
 
     BegSr CloseData
@@ -56,11 +55,11 @@ BegClass OrderRepository Access(*Public)
 
 		OpenData()
 		
-		Customer_CMCustNo = CMCustno 
-		Chain Customer Key(Customer_CMCustNo) 
-		If Customer.IsFound 
-			Customer_CMActive = NewStatus
-			Update Customer 
+		Doctor_Id = CMCustno 
+		Chain DoctorWKL1 Key(Doctor_Id) 
+		If DoctorWKL1.IsFound 
+			Doctor_Heart = NewStatus
+			Update DoctorWKL1
 			Result = *True 
 		Else 
 			Result = *False

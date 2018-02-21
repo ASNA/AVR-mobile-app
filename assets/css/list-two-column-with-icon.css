@@ -32,11 +32,18 @@ section.navigation {
 
 section.navigation > div {
    width: 4rem;
-   padding: 4px 4px 4px 4px;
+   height: 4rem;
+   padding: 4px 4px 6px 4px;
    background: #17202A;
    margin-left: 6px;
    text-align: center;
 }   
+
+.nav-button {
+    font-size: 4rem; 
+    color: white; 
+}
+
 
 /*
  |

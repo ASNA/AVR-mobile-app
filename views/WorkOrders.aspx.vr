@@ -12,18 +12,18 @@ Using System.Web.UI.HtmlControls
 
 BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 
-	DclDb DGDB DBName('*Public/DG NET Local') 
+	DclDb DGDB DBName('*Public/Cypress') 
 
-	DclFld workList Type(WorkOrderList) 
+	DclFld workList Type(DoctorOrderList) 
+
+	DclFld PageNumber Type(*Integer4) 
 
     BegSr Page_Load Access(*Private) Event(*This.Load)
         DclSrParm sender Type(*Object)
         DclSrParm e Type(System.EventArgs)
 
-		DGDB.DBName = Session['dbname'].ToString()
-		Connect DGDB
 
-		worklist = *New WorkOrderList(DGDB, 5) 
+		workList = *New DoctorOrderList(DGDB, 5) 
 
         If (NOT Page.IsPostBack)
 			Page.Title = 'Work orders'
@@ -33,15 +33,19 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 			CurrentMaster = *This.Master *As HomeMaster
 			CurrentMaster.ChildPage = *New FileInfo(*This.Request.Url.LocalPath).Name
 			CurrentMaster.PageHeading = 'Work order ready?'
-
-			listviewWorkOrders.DataSource = workList.GetDataRows()
-			listviewWorkOrders.DataBind()
-        Else
-            //
-            // Called subsequent times that the page is displayed.
-            //
+			PageNumber = 1
+			ViewState['pagenumber'] = PageNumber 
+			PopulateList(PageNumber) 
         EndIf
+
     EndSr
+
+	BegSr PopulateList
+		DclSrParm PageNumber Type(*Integer4) 
+
+		listviewWorkOrders.DataSource = workList.PopulateList(PageNumber)
+		listviewWorkOrders.DataBind()
+	EndSr
 
     BegSr Page_Unload Access(*Private) Event(*This.Unload)
         DclSrParm sender Type(*Object)
@@ -58,4 +62,28 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 		FormsAuthentication.SignOut()
 		FormsAuthentication.RedirectToLoginPage()		
 	EndSr
+
+	BegSr ShowPrevPageButton_Click Access(*Private) Event(*This.ShowPrevPageButton.Click)
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(System.EventArgs)
+		
+		PageNumber = Convert.ToInt32(ViewState['pagenumber'].ToString())
+		If (PageNumber = 1) 
+			LeaveSr 
+		EndIf
+		PageNumber -= 1 				
+		PopulateList(PageNumber) 
+		ViewState['pagenumber'] = PageNumber 
+	EndSr
+
+	BegSr ShowNextPageButton_Click Access(*Private) Event(*This.ShowNextPageButton.Click)
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(System.EventArgs)
+		
+		PageNumber = Convert.ToInt32(ViewState['pagenumber'].ToString())
+		PageNumber += 1 				
+		PopulateList(PageNumber) 
+		ViewState['pagenumber'] = PageNumber 
+	EndSr
+
 EndClass

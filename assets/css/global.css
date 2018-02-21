@@ -1,4 +1,8 @@
-﻿.display-no {
+﻿html {
+    font-size: 16px;
+}
+
+.display-no {
     display:none;
 }
 
@@ -20,3 +24,4 @@
     background-color: #f8d7da;
     padding: .5em;
 }
+
