@@ -26,6 +26,18 @@ BegClass DoctorOrderList Access(*Public)
 		DB(DGDB) +
 		ImpOpen(*No) 
 
+/*
+	Create Table rpmrdata.webtemp (
+		Id integer  not null generated always as identity primary key,
+		Session VarChar(10),
+		CMCustNo integer,
+		CMName varchar(40),
+		CMCity varChar(30),
+		CMState varChar(25), 
+		CMActive VarChar(1)
+	)
+*/
+
     DclMemoryFile InfoList ImpOpen(*Yes) 
         DclRecordFormat InfoListR
 		DclRecordFld    InfoList_Status Type(*Char) Len(1) 
@@ -39,6 +51,7 @@ BegClass DoctorOrderList Access(*Public)
 
     DclFld CustomerName      Type(*String) Access(*Public)         
     DclFld CustomerNumber    Type(*String) Access(*Public) 
+	DclFld UniqueUserKey     Type(*String) Access(*Public) 
 
 
 	BegConstructor Access(*Public)
@@ -48,9 +61,13 @@ BegClass DoctorOrderList Access(*Public)
         //
         DclSrParm DGDB     Type(ASNA.VisualRPG.Runtime.Database)
         DclSrParm PageSize Type(*Integer4)
+		DclFld hasher Type(HashidsNet.Hashids) 
+		DclFld Hasheduser Type(*String) 
 
         *This.DGDB = DGDB
         *This.PageSize = PageSize 
+		hasher = *New HashIdsNet.Hashids(DateTime.Now().ToString('ffffff'))
+		*This.UniqueUserKey = hasher.Encode(1, 2, 3)
 	EndConstructor
 
     BegSr OpenData 
@@ -72,7 +89,7 @@ BegClass DoctorOrderList Access(*Public)
 
 		OpenData()
 
-		Result = CallPgm2(*This.DGDB, PageNo, *This.PageSize) 
+		Result = GetWorkList(*This.DGDB, PageNo, *This.PageSize, *This.UniqueUserKey) 
 		*This.MoreRows = Result.MoreRows
 		*This.RowsReturned = Result.RowsReturned
 
@@ -100,26 +117,30 @@ BegClass DoctorOrderList Access(*Public)
             If (WebTempFile.IsEof) 
                 Leave
             EndIf
-			
-			infoList_IconClass = (WebTemp_CMActive = '0') ? +
-			   "fas fa-thumbs-down big-icon-red" : +
-			   "fas fa-thumbs-up big-icon-green"
 
-			InfoList_AccountId = WebTemp_CMCustNo.ToString('###########')
-			InfoList_Status = WebTemp_CMActive
+			// Not likely, but ensure no date for other users lurk. 
+			If (WebTemp_Session = *This.UniqueUserKey) 						
+				infoList_IconClass = (WebTemp_CMActive = '0') ? +
+				   "fas fa-thumbs-down big-icon-red" : +
+				   "fas fa-thumbs-up big-icon-green"
 
-			RowTemplate.Clear()
-			RowTemplate.Append(InfoTemplate.ToString())
-		    RowTemplate.Replace('{{order-number}}', '456675')
-		    RowTemplate.Replace('{{customer-number}}', WebTemp_CMCustNo.ToString('############'))
-		    RowTemplate.Replace('{{customer-name}}', WebTemp_CMName.Trim())
-		    RowTemplate.Replace('{{directions}}', WebTemp_CMCity)
-		    RowTemplate.Replace('{{product}}', 'Dry Run')
+				InfoList_AccountId = WebTemp_CMCustNo.ToString('###########')
+				InfoList_Status = WebTemp_CMActive
 
-			InfoList_LineInfo = RowTemplate.ToString() 
-			
-            Write InfoList 
+				RowTemplate.Clear()
+				RowTemplate.Append(InfoTemplate.ToString())
+				RowTemplate.Replace('{{order-number}}', '456675')
+				RowTemplate.Replace('{{customer-number}}', WebTemp_CMCustNo.ToString('############'))
+				RowTemplate.Replace('{{customer-name}}', WebTemp_CMName.Trim())
+				RowTemplate.Replace('{{directions}}', WebTemp_CMCity)
+				RowTemplate.Replace('{{product}}', 'Dry Run')
+
+				InfoList_LineInfo = RowTemplate.ToString() 
+				Write InfoList 
+			EndIf
         EndDo
+
+		DeleteWorkList(*This.DGDB, *This.UniqueUserKey) 
 
         CustomerNumber = WebTemp_CMCustNo
         CustomerName = WebTemp_CMName 
@@ -129,37 +150,43 @@ BegClass DoctorOrderList Access(*Public)
         LeaveSr InfoList.DataSet.Tables[ 0 ]
     EndFunc 
 
-
-	BegFunc CallPgm2  Type(CallInfo) Access(*Public) 
+	BegFunc GetWorkList Type(CallInfo) Access(*Public) 
 		DclSrParm DGDB Type(ASNA.VisualRPG.Runtime.Database) 
 		DclSrParm PageNo Type(*Integer4) 
 		DclSrParm PageSize Type(*Integer4) 
+		DclSrParm UniqueUserKey Type(*String) 
 
-		DclFld PageNumber Type(*Integer4) 
-		DclFld MoreRows Type(*Integer4) 
-		DclFld RowsReturned Type(*Integer4) 
-		DclFld Filter Type(*Char) Len(40) 
-		DclFld UserName Type(*Char) Len(10)
+		DclFld MoreRows Type(*Integer4) Inz(0)
+		DclFld RowsReturned Type(*Integer4)  Inz(0)
+		DclFld Filter Type(*Char) Len(40) Inz(*Blanks) 
+		DclFld UserName Type(*Char) Len(10) Inz(UniqueUserKey)
 
-		DclFld Result Type(CallInfo) New() 			
+		DclFld Result Type(CallInfo) New()
 
-		MoreRows = 0
-		RowsReturned = 0
-		Filter = *BLANKS
-		UserName = 'abcdef'
-	
 		Call 'RPDREAM/sqldoc' DB(DGDB) 
-		DclParm PageSize
+		DclParm PageSize 
 		DclParm PageNo
 		DclParm MoreRows
 		DclParm RowsReturned
-		DclParm Filter
-		DclParm UserName 
+		DclParm Filter 
+		DclParm UserName // CpyFrom(UniqueUserKey) 
 
  		Result.MoreRows = MoreRows 
 		Result.RowsReturned = RowsReturned
 		LeaveSr Result
 	EndFunc
+
+	BegSr DeleteWorkList Access(*Public) 
+		DclSrParm DGDB Type(ASNA.VisualRPG.Runtime.Database) 
+		DclSrParm UniqueUserKey Type(*String) 
+
+		DclFld UserKey Type(*Char) Len(10)
+
+		UserKey = UniqueUserKey 
+	
+		Call 'RPDREAM/dltdoc' DB(DGDB) 
+		DclParm UserKey
+	EndSr
 
 EndClass
 
