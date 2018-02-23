@@ -17,24 +17,25 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 	DclFld workList Type(DoctorOrderList) 
 
 	DclFld PageNumber Type(*Integer4) 
+	DclFld Filter Type(*String) 
 
     BegSr Page_Load Access(*Private) Event(*This.Load)
         DclSrParm sender Type(*Object)
         DclSrParm e Type(System.EventArgs)
 
-
+		DclFld CurrentMaster Type(HomeMaster) 
+	
+		Page.Title = 'Work orders'
+		CurrentMaster = *This.Master *As HomeMaster
+		CurrentMaster.ChildPage = *New FileInfo(*This.Request.Url.LocalPath).Name
+		CurrentMaster.PageHeading = 'Work order ready?'
+	
 		workList = *New DoctorOrderList(DGDB, 5) 
 
         If (NOT Page.IsPostBack)
-			Page.Title = 'Work orders'
-
-			DclFld CurrentMaster Type(HomeMaster) 
-
-			CurrentMaster = *This.Master *As HomeMaster
-			CurrentMaster.ChildPage = *New FileInfo(*This.Request.Url.LocalPath).Name
-			CurrentMaster.PageHeading = 'Work order ready?'
 			PageNumber = 1
 			ViewState['pagenumber'] = PageNumber 
+			ViewState['filter'] = String.Empty
 			PopulateList(PageNumber) 
         EndIf
 
@@ -84,6 +85,18 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 		PageNumber += 1 				
 		PopulateList(PageNumber) 
 		ViewState['pagenumber'] = PageNumber 
+	EndSr
+
+	BegSr FilterListButton_Click Access(*Private) Event(*This.FilterListButton.Click)
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(System.EventArgs)
+
+		DclFld Filter Type(*String) 
+
+		PageNumber = 1
+		ViewState['pagenumber'] = PageNumber 
+
+		Filter = FilterValue.Text		
 	EndSr
 
 EndClass

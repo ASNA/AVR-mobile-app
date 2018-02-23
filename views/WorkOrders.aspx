@@ -5,31 +5,45 @@
     <link rel="stylesheet" href="<%=Page.ResolveUrl("~")%>assets/css/list-two-column-with-icon.css">
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="content" Runat="Server">
-
-
+<asp:Content ID="Content2" ContentPlaceHolderID="content" Runat="Server">    
     <section>
-        <section class="navigation">
-            <div class="mobile-only">
-                <i class="fas fa-home nav-button"></i>
-            </div>
-            <div>
-                <asp:LinkButton ID="ShowPrevPageButton" cssclass="nav-buttonxx" runat="server"><i class="fas fa-angle-left nav-button"></i></asp:LinkButton>
-            </div>
-            <div>
-                <asp:LinkButton ID="ShowNextPageButton" cssclass="nav-buttonxx" runat="server"><i class="fas fa-angle-right nav-button"></i></asp:LinkButton>
-            </div>
-            <div class="mobile-only">
-                <asp:LinkButton ID="linkbuttonLogout" runat="server">
-                    <div>
-                        <i class="fas fa-sign-out-alt nav-button"></i>
-                    </div>
-                </asp:LinkButton>
-            </div>
+          <section class="navigation">
+              <div class="mobile-only">   
+                  <asp:LinkButton ID="GotoHomeButton" cssclass="nav-button btn" runat="server"><i class="fa fa-home"></i></asp:LinkButton>
+              </div>
+
+              <div>
+                <asp:LinkButton ID="ShowPrevPageButton" cssclass="nav-button btn" runat="server"><i class="fa fa-angle-left"></i></asp:LinkButton>
+              </div>      
+
+              <div>
+                <asp:LinkButton ID="ShowNextPageButton" cssclass="nav-button btn" runat="server"><i class="fa fa-angle-right"></i></asp:LinkButton>
+              </div>      
+
+              <div>
+                 <button  id="toggle-filter" class="nav-button btn" type="button">
+                    <i class="fa fa-search"></i>
+                </button>            
+              </div>         
+
+              <div class="mobile-only">
+                <asp:LinkButton ID="linkbuttonLogout" cssclass="nav-button btn" runat="server"><i class="fa fa-sign-out"></i></asp:LinkButton>
+              </div>      
         </section>
+
+
+        <asp:Panel ID="Panel1" runat="server" DefaultButton="FilterListButton">
+        <section id="filter-bar" hidden>
+           <%--<input type="search" id="filter-value" placeholder="Filter on..."/>--%>
+
+           <asp:TextBox ID="FilterValue" runat="server" placeholder="Filter on..." ClientIDMode="Static" AutoPostBack="False"></asp:TextBox>
+           <asp:LinkButton hidden ID="FilterListButton" runat="server" ClientIDMode="Static">Link button2</asp:LinkButton>
+        </section>
+        </asp:Panel>
+
     </section>
 
-    <div>
+    <div hidden>
         <a href="#" id="test-button">Click me</a>
     </div>
 

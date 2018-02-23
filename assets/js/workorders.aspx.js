@@ -1,5 +1,8 @@
 ﻿"use strict";
 
+$(function () {
+
+
 function changeStatus(accountid, status) {
     let json = { cmcustno: accountid, status: status };
 
@@ -55,4 +58,19 @@ for (var i = 0; i < thumbs.length; i++) {
     });
 }
 
-    
+document.getElementById('toggle-filter').
+   addEventListener('click', function (e) {
+
+       var filterBar = document.getElementById('filter-bar');
+       if (filterBar.hasAttribute('hidden')) {
+           filterBar.removeAttribute('hidden');
+           document.getElementById('FilterValue').focus();
+       }
+       else {
+           filterBar.setAttribute('hidden', 'true');
+       }
+   });
+});
+
+
+

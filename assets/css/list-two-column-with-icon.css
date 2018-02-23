@@ -30,20 +30,13 @@ section.navigation {
    padding: 12px 4px 12px 4px;
 }
 
-section.navigation > div {
-   width: 4rem;
-   height: 4rem;
-   padding: 4px 4px 6px 4px;
-   background: #17202A;
-   margin-left: 6px;
-   text-align: center;
-}   
-
 .nav-button {
-    font-size: 4rem; 
-    color: white; 
+    font-size: 1.5rem;
+    width: 2.4em;
+    color: white;
+    background-color: #403e3d;
+    margin-right: .25rem;
 }
-
 
 /*
  |
@@ -109,3 +102,17 @@ section.info-item-container section.nav {
 .big-icon-green {
     font-size: 350%;
     color: green;
+}
+
+section#filter-bar {
+   padding: .5rem .5rem .5rem .5rem;
+   background: lightgray;
+}
+
+section#filter-bar input {
+   font-size: 2rem;
+   border: none;
+   width: 100%;
+   padding: 0 0 0 .5rem;
+}
+

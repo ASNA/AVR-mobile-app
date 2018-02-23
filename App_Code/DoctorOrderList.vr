@@ -85,11 +85,18 @@ BegClass DoctorOrderList Access(*Public)
     BegFunc PopulateList Type(DataTable) Access(*Public) 
 		DclSrParm PageNo Type(*Integer4) 
 
+		LeaveSr PopulateList(PageNo, String.Empty) 									
+	EndFunc 
+	
+    BegFunc PopulateList Type(DataTable) Access(*Public) 
+		DclSrParm PageNo Type(*Integer4) 
+		DclSrParm Filter Type(*String) 
+
 		DclFld Result Type(CallInfo) 
 
 		OpenData()
 
-		Result = GetWorkList(*This.DGDB, PageNo, *This.PageSize, *This.UniqueUserKey) 
+		Result = GetWorkList(*This.DGDB, PageNo, *This.PageSize, *This.UniqueUserKey, Filter) 
 		*This.MoreRows = Result.MoreRows
 		*This.RowsReturned = Result.RowsReturned
 
@@ -155,10 +162,11 @@ BegClass DoctorOrderList Access(*Public)
 		DclSrParm PageNo Type(*Integer4) 
 		DclSrParm PageSize Type(*Integer4) 
 		DclSrParm UniqueUserKey Type(*String) 
+		DclSrParm Filter Type(*Char) Len(40) 
 
 		DclFld MoreRows Type(*Integer4) Inz(0)
 		DclFld RowsReturned Type(*Integer4)  Inz(0)
-		DclFld Filter Type(*Char) Len(40) Inz(*Blanks) 
+		//DclFld Filter Type(*Char) Len(40) Inz(*Blanks) 
 		DclFld UserName Type(*Char) Len(10) Inz(UniqueUserKey)
 
 		DclFld Result Type(CallInfo) New()
