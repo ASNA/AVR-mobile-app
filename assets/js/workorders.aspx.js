@@ -72,12 +72,3 @@ document.getElementById('toggle-filter').
    });
 });
 
-
-document.getElementById('FilterValue').addEventListener('keyup', function (e) {
-    const ENTER_KEY = 13;
-    if (e.keyCode == ENTER_KEY) {
-        document.getElementById('FilterListButton').click();
-    }
-});
-
-
