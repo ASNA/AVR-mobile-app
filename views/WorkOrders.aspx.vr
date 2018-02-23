@@ -18,39 +18,58 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 
 	DclFld PageNumber Type(*Integer4) 
 	DclFld Filter Type(*String) 
+	DclFld CurrentControl Type(*String) Access(*Public) 
+	DclFld DebugMessage Type(*String) Access(*Public) 
 
     BegSr Page_Load Access(*Private) Event(*This.Load)
         DclSrParm sender Type(*Object)
         DclSrParm e Type(System.EventArgs)
 
 		DclFld CurrentMaster Type(HomeMaster) 
+		DebugMessage = String.Empty
+
+		If ViewState['filter'] = *Nothing
+			Filter = String.Empty
+		Else
+			Filter = ViewState['filter'].ToString() 
+			ClearFilter.Text = String.Format("Filtered on '{0}'. Tap to clear filter", *This.Filter) 
+			FilterContainer.Visible = *True 
+		EndIf 
 	
 		Page.Title = 'Work orders'
 		CurrentMaster = *This.Master *As HomeMaster
 		CurrentMaster.ChildPage = *New FileInfo(*This.Request.Url.LocalPath).Name
 		CurrentMaster.PageHeading = 'Work order ready?'
 	
-		workList = *New DoctorOrderList(DGDB, 5) 
+		workList = *New DoctorOrderList(DGDB, 15) 
 
         If (NOT Page.IsPostBack)
 			PageNumber = 1
 			ViewState['pagenumber'] = PageNumber 
-			ViewState['filter'] = String.Empty
-			PopulateList(PageNumber) 
+			PopulateList(PageNumber, *This.Filter) 
         EndIf
-
     EndSr
 
 	BegSr PopulateList
 		DclSrParm PageNumber Type(*Integer4) 
+		DclSrParm Filter Type(*String) 
 
-		listviewWorkOrders.DataSource = workList.PopulateList(PageNumber)
+		listviewWorkOrders.DataSource = workList.PopulateList(PageNumber, Filter)
 		listviewWorkOrders.DataBind()
 	EndSr
+
+	BegSr Page_PreRender Access(*Private) Event(*This.PreRender)
+        DclSrParm sender Type(*Object)
+        DclSrParm e Type(System.EventArgs)
+
+		FilterContainer.Visible = String.IsNullOrEmpty(*This.Filter)? *False : *True
+    EndSr
 
     BegSr Page_Unload Access(*Private) Event(*This.Unload)
         DclSrParm sender Type(*Object)
         DclSrParm e Type(System.EventArgs)
+
+		FilterContainer.Visible = String.IsNullOrEmpty(*This.Filter)? *False : *True
 
 		Close *All
 		Disconnect DGDB
@@ -73,7 +92,7 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 			LeaveSr 
 		EndIf
 		PageNumber -= 1 				
-		PopulateList(PageNumber) 
+		PopulateList(PageNumber, *This.Filter) 
 		ViewState['pagenumber'] = PageNumber 
 	EndSr
 
@@ -83,7 +102,7 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 		
 		PageNumber = Convert.ToInt32(ViewState['pagenumber'].ToString())
 		PageNumber += 1 				
-		PopulateList(PageNumber) 
+		PopulateList(PageNumber, *This.Filter) 
 		ViewState['pagenumber'] = PageNumber 
 	EndSr
 
@@ -91,12 +110,31 @@ BegClass WorkOrders Partial(*Yes) Access(*Public) Extends(System.Web.UI.Page)
 		DclSrParm sender Type(*Object)
 		DclSrParm e Type(System.EventArgs)
 
-		DclFld Filter Type(*String) 
+		SetFilter() 
+	EndSr 
+
+	BegSr SetFilter 
+		*This.Filter = FilterValue.Text 
 
 		PageNumber = 1
+		PopulateList(PageNumber, *This.Filter) 
 		ViewState['pagenumber'] = PageNumber 
-
-		Filter = FilterValue.Text		
+		ViewState['filter'] = *This.Filter 	
+		ClearFilter.Text = String.Format("Filtered on '{0}'. Tap to clear filter", *This.Filter) 
+		ClearFilter.Visible = *True 
 	EndSr
+		
+	BegSr ClearFilter_Click Access(*Private) Event(*This.ClearFilter.Click)
+		DclSrParm sender Type(*Object)
+		DclSrParm e Type(System.EventArgs)
 
+		*This.Filter = String.Empty 
+		
+		*This.PageNumber = 1
+		PopulateList(*This.PageNumber, *This.Filter) 
+		ViewState['pagenumber'] = *This.PageNumber 
+		ViewState['filter'] = *This.Filter 	
+		ClearFilter.Visible = *False
+		ClearFilter.Text = String.Empty 
+	EndSr
 EndClass

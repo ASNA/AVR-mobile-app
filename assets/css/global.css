@@ -25,3 +25,11 @@
     padding: .5em;
 }
 
+#clear-filter-container {
+    text-align: center;
+    padding: .3rem;
+}
+
+#clear-filter-container a {
+    color:  #2E2D2C;
+}

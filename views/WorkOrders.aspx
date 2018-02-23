@@ -31,7 +31,6 @@
               </div>      
         </section>
 
-
         <asp:Panel ID="Panel1" runat="server" DefaultButton="FilterListButton">
         <section id="filter-bar" hidden>
            <%--<input type="search" id="filter-value" placeholder="Filter on..."/>--%>
@@ -43,10 +42,18 @@
 
     </section>
 
-    <div hidden>
-        <a href="#" id="test-button">Click me</a>
-    </div>
+<%--    <div>
+        <%= *This.CurrentControl %>
+        <br />
+        <%= *this.DebugMessage %>
+    </div>--%>
 
+    <asp:Panel ID="FilterContainer" Visible="false" runat="server" EnableViewState="false">
+        <div id="clear-filter-container" class="alert-info">        
+            <asp:LinkButton ID="ClearFilter" runat="server"></asp:LinkButton>
+        </div>
+    </asp:Panel>
+        
     <asp:ListView ID="listviewWorkOrders" runat="server" EnableViewState="false">
             <LayoutTemplate>
                 <section class="info-list">

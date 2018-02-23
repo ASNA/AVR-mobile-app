@@ -96,7 +96,7 @@ BegClass DoctorOrderList Access(*Public)
 
 		OpenData()
 
-		Result = GetWorkList(*This.DGDB, PageNo, *This.PageSize, *This.UniqueUserKey, Filter) 
+		Result = GetWorkList(*This.DGDB, PageNo, *This.PageSize, *This.UniqueUserKey, Filter.Trim().ToLower()) 
 		*This.MoreRows = Result.MoreRows
 		*This.RowsReturned = Result.RowsReturned
 
