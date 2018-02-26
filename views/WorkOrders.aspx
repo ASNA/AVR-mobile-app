@@ -50,7 +50,7 @@
 
     <asp:Panel ID="FilterContainer" Visible="false" runat="server" EnableViewState="false">
         <div id="clear-filter-container" class="alert-info">        
-            <asp:LinkButton ID="ClearFilter" runat="server"></asp:LinkButton>
+            <asp:LinkButton ID="ClearFilter" runat="server" EnableViewState="false"></asp:LinkButton>
         </div>
     </asp:Panel>
         

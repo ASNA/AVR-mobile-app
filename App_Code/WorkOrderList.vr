@@ -36,6 +36,8 @@ BegClass WorkOrderList Access(*Public)
     DclFld CustomerName      Type(*String) Access(*Public)         
     DclFld CustomerNumber    Type(*String) Access(*Public) 
     DclFld PositionToMessage Type(*String) Access(*Public) 
+	DclFld MoreRows Type(*Integer4) Access(*Public) 
+	DclFld RowsReturned Type(*Integer4) Access(*Public) 
         
     DclFld PageSize Type(*Integer4)  
     

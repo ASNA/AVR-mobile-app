@@ -46,12 +46,12 @@ BegClass DoctorOrderList Access(*Public)
         DclRecordFld    InfoList_LineInfo  Type(*Char) Len(512)
 
 	DclFld PageSize Type(*Integer4) 
-	DclFld MoreRows Type(*Integer4) 
-	DclFld RowsReturned Type(*Integer4) 
 
     DclFld CustomerName      Type(*String) Access(*Public)         
     DclFld CustomerNumber    Type(*String) Access(*Public) 
 	DclFld UniqueUserKey     Type(*String) Access(*Public) 
+	DclFld MoreRows Type(*Integer4)  Access(*Public) 
+	DclFld RowsReturned Type(*Integer4) Access(*Public) 
 
 
 	BegConstructor Access(*Public)
@@ -72,10 +72,17 @@ BegClass DoctorOrderList Access(*Public)
 
     BegSr OpenData 
         If (NOT DGDB.IsOpen)
-			DGDB.InitialLibl = *New String[] {'rpmrdata', 'rpdream'}				
+			// You could set the library list like this _before_ 
+			// connecting to the database.
+			//DGDB.InitialLibl = *New String[] {'rpmrdata', 'rpdream'}				
             Connect DGDB
+			// Or you could set the library list (as well as do other environment
+			// tasks) by calling a programming immediately after connecting. 
+			Call 'RPDREAM/SETENV' DB(DGDB) 
         EndIf
-        Open WebTempFile
+		If (Not WebTempFile.IsOpen) 
+			Open WebTempFile
+		EndIf 
     EndSr
 
     BegSr CloseData
