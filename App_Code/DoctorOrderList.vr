@@ -184,7 +184,7 @@ BegClass DoctorOrderList Access(*Public)
 		DclParm MoreRows
 		DclParm RowsReturned
 		DclParm Filter 
-		DclParm UserName // CpyFrom(UniqueUserKey) 
+		DclParm UserName
 
  		Result.MoreRows = MoreRows 
 		Result.RowsReturned = RowsReturned

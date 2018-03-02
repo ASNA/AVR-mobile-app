@@ -51,7 +51,10 @@ function finishStatusChange(json, startTime) {
 let thumbs = document.querySelectorAll('.change-status');
 for (var i = 0; i < thumbs.length; i++) {
     let thumb = thumbs[i].parentElement;
-    thumb.addEventListener('click', function(e) {
+    thumb.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         let status = this.parentElement.getAttribute('data-status');
         let accountid = this.parentElement.getAttribute('data-accountid');
         changeStatus(accountid, status);
@@ -60,7 +63,8 @@ for (var i = 0; i < thumbs.length; i++) {
 
 document.getElementById('toggle-filter').
    addEventListener('click', function (e) {
-
+       e.preventDefault();
+       e.stopPropagation();
        var filterBar = document.getElementById('filter-bar');
        if (filterBar.hasAttribute('hidden')) {
            filterBar.removeAttribute('hidden');
